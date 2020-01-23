@@ -19,11 +19,21 @@ public class FTQClient {
     final String hostname = "localhost";
     final int server_port = 7621;
 
-    public String processMsg(String status_code) {
+    public String processMsg(String status_code) throws IOException {
+        BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         String response = "";
         switch(status_code){
             case "100": // username
-
+                response = stdIn.readLine();
+                break;
+            case "101":
+                response = new String(System.console().readPassword());
+                break;
+            case "300":
+                break;
+            default:
+                response = stdIn.readLine();
+                
         }
         return response;
     }
@@ -42,26 +52,28 @@ public class FTQClient {
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         ){
             FTQUtils.print("client is running");
-            BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
             boolean connected = true;
             String[] server_msg = new String[2]; 
             String user_msg, raw_server_msg;
             FTQUtils.print(connected);
             while(((raw_server_msg = in.readLine()) != null) && connected){
                 FTQUtils.print("in loop");
-                // while(!in.ready()){System.out.println("NOT READY");}
                 server_msg = raw_server_msg.split("-", 2);
-                // FTQUtils.print(server_msg);
                 printMsg((server_msg[1].split("@", 0)));
+
                 // server has ended game session
                 if(server_msg[0].equals("404"))
                     connected = false;
                 
                 // server sends instructions
+                /*
                 if(server_msg[0].equals("101")) // password entry
                     user_msg = new String(System.console().readPassword());
                 else
                     user_msg = stdIn.readLine();
+                    */
+
+                user_msg = processMsg(server_msg[0]);
 
                 if(user_msg != null)
                     FTQUtils.print("sent response");

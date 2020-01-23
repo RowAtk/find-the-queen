@@ -4,6 +4,7 @@ import ftq.utils.FTQUtils;
 import java.net.*;
 import java.io.*;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Server for the Find the Queen CLI game
@@ -15,41 +16,57 @@ public class FTQServer {
 
     private static boolean debug = false;
     private static final int port = 7621;
-    private boolean keepAlive = true;
     private Connection[] clients;
+
+    private int dealer = 1;
+    private int spotter = 0;
+    private boolean keepAlive = true;
 
     public static void usage() {
         System.out.println("Usage: FTQServer <options> \nwhere options include:\t -d \t Debug mode");
     }
 
-    public void endGame(String error_msg){
-        // end game session
-        for(Connection c : clients) {
-            c.out.println(String.format("400-%s@Thanks for Playing", error_msg));
-        }
+   
+
+    public void switchRoles() {
+        int swap;
+        swap = dealer;
+        dealer = spotter;
+        spotter = swap;
     }
 
     public void run() {
         try(
             ServerSocket serverSocket = new ServerSocket(port);
-            Connection clientSocket1 = new Connection(serverSocket.accept());
-            Connection clientSocket2 = new Connection(serverSocket.accept());
+            Connection clientSocket1 = new Connection(serverSocket.accept(), "Danny");
+            Connection clientSocket2 = new Connection(serverSocket.accept(), "Matty");
         ) {
             // Both clients connected successfully or cancelled login
+            clients = new Connection[]{clientSocket1, clientSocket2};
             if(clientSocket1.loggedIn && clientSocket2.loggedIn) {
-                FTQUtils.print("Both clients connected");
-                clients = new Connection[]{clientSocket1, clientSocket2};
+                FTQUtils.print("Both clients connected");   
             } else{
                 // end game due o login failures
-                System.out.println("login failure");
-                endGame("1 or more players failed to login");
+                // System.out.println("login failure");
+                // endGame("1 or more players failed to login");
             }
+
+            // Start of game 
             FTQUtils.print(clients);
+            String client_msg;
+            
+            dealer = new Random().nextInt(2);
+            if(dealer == 0) spotter = 1;
+            FTQProtocol protocol = new FTQProtocol(clients[dealer], clients[spotter]);
+            while(keepAlive) {
+                keepAlive = protocol.processMsg();
+                // System.out.println(client_msg);
+            }
 
             
 
         } catch (Exception e) {
-            //TODO: handle exception
+            System.out.println("Server Error " + e.toString());
         }
     }
 

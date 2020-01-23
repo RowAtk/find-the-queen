@@ -21,13 +21,23 @@ public class Connection implements AutoCloseable {
     String username;
     String password;
     boolean loggedIn = false;
+    int wins = 0;
 
     public Connection(Socket s) throws IOException {
         this.clientSocket = s;
         this.out = new PrintWriter(this.clientSocket.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
         System.out.println("Client connected");
-        login();
+        // login();
+    }
+
+    public Connection(Socket s, String name) throws IOException {
+        this.clientSocket = s;
+        this.out = new PrintWriter(this.clientSocket.getOutputStream(), true);
+        this.in = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
+        this.username = name;
+        System.out.println("Client connected");
+        // login();
     }
 
     private void login() throws IOException {
