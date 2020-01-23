@@ -53,17 +53,19 @@ public class FTQServer {
 
             // Start of game 
             FTQUtils.print(clients);
-            String client_msg;
+            int turns = 5; // max # of rounds
             
             dealer = new Random().nextInt(2);
             if(dealer == 0) spotter = 1;
-            FTQProtocol protocol = new FTQProtocol(clients[dealer], clients[spotter]);
-            while(keepAlive) {
-                keepAlive = protocol.processMsg();
-                // System.out.println(client_msg);
+            FTQProtocol protocol = new FTQProtocol(clients[dealer], clients[spotter], 0);
+            for(int t = 0; t < turns; t++){
+                while(keepAlive) {
+                    keepAlive = protocol.processMsg();
+                }
+                System.out.println("Round End");
+                switchRoles();
+                protocol = new FTQProtocol(clients[dealer], clients[spotter], t + 1);
             }
-
-            
 
         } catch (Exception e) {
             System.out.println("Server Error " + e.toString());

@@ -19,13 +19,15 @@ public class FTQProtocol {
     private boolean keepAlive = true;
     private Connection dealer;
     private Connection spotter;
+    private int round;
     private int hiding_spot;
 
     private int state = START;
 
-    public FTQProtocol(Connection dealer, Connection spotter) {
+    public FTQProtocol(Connection dealer, Connection spotter, int round) {
         this.dealer = dealer;
         this.spotter = spotter;
+        this.round = round;
     }
 
     public void endGame(String error_msg){
@@ -49,11 +51,25 @@ public class FTQProtocol {
             case HIDING:
                 dealer.out.println("301-Choose a position to hide the queen (1 - 3)");
                 response = dealer.in.readLine();
+                // System.out.println("Response: " + response);
                 hiding_spot = Integer.parseInt(response);
                 state = GUESSING;
                 break;
+            case GUESSING:
+                spotter.out.println(String.format("302-Where did %s hide the queen? (1-3)", dealer.username));
+                response = spotter.in.readLine();
+                int guess = Integer.parseInt(response);
+                if(guess == hiding_spot) {
+                    talk(String.format("400-%s the Spotter wins round %d", spotter.username, round + 1));
+                    spotter.wins++;
+                } else {
+                    talk(String.format("400-%s the Dealer wins round %d", dealer.username, round + 1));
+                    dealer.wins++;
+                }
+                break;
             default:
                 System.out.println("Unknown current state");
+                keepAlive = false;
         }
 
         return keepAlive;

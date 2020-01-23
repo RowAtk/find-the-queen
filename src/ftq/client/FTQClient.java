@@ -19,9 +19,15 @@ public class FTQClient {
     final String hostname = "localhost";
     final int server_port = 7621;
 
+    public void printMsg(String[] msgs) {
+        for(String msg : msgs) {
+            System.out.println(msg);
+        }
+    }
+
     public String processMsg(String status_code) throws IOException {
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-        String response = "";
+        String response = null;
         switch(status_code){
             case "100": // username
                 response = stdIn.readLine();
@@ -36,12 +42,6 @@ public class FTQClient {
                 
         }
         return response;
-    }
-
-    public void printMsg(String[] msgs) {
-        for(String msg : msgs) {
-            System.out.println(msg);
-        }
     }
 
     public void run() {
@@ -61,23 +61,20 @@ public class FTQClient {
                 server_msg = raw_server_msg.split("-", 2);
                 printMsg((server_msg[1].split("@", 0)));
 
+                FTQUtils.print(server_msg[0]);
+
                 // server has ended game session
                 if(server_msg[0].equals("404"))
                     connected = false;
                 
                 // server sends instructions
-                /*
-                if(server_msg[0].equals("101")) // password entry
-                    user_msg = new String(System.console().readPassword());
-                else
-                    user_msg = stdIn.readLine();
-                    */
-
                 user_msg = processMsg(server_msg[0]);
 
-                if(user_msg != null)
+                if(user_msg != null){
                     FTQUtils.print("sent response");
                     out.println(user_msg);
+                }
+                    
             }
 
         } catch (Exception e) {
