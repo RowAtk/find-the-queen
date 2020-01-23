@@ -23,11 +23,11 @@ public class UserAdmin {
                     out.println("200-User " + username + " successfully logged in");
                     return true;
                 }
-                out.println("104-User " + username + " already logged in @Try again?(Y|N)");
+                out.println("105-User " + username + " already logged in");
                 return false;
             }
         }
-        out.println("104-Incorrect login credentials@Try again?(Y|N)");
+        out.println("105-Incorrect login credentials");
         return false;
     }
 

@@ -2,7 +2,7 @@ package ftq.server;
 
 import java.net.*;
 
-import ftq.utils.FTQUtils;
+import ftq.utils.*;
 
 import java.io.*;
 
@@ -14,21 +14,20 @@ import java.io.*;
  */
 public class Connection implements AutoCloseable {
 
-    Socket clientSocket;
-    PrintWriter out;
-    BufferedReader in;
+    public Socket clientSocket;
+    public PrintWriter out;
+    public BufferedReader in;
 
-    String username;
-    String password;
-    boolean loggedIn = false;
-    int wins = 0;
+    public String username;
+    public String password;
+    public boolean loggedIn = false;
+    public int wins = 0;
 
     public Connection(Socket s) throws IOException {
         this.clientSocket = s;
         this.out = new PrintWriter(this.clientSocket.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
-        System.out.println("Client connected");
-        // login();
+        login();
     }
 
     public Connection(Socket s, String name) throws IOException {
@@ -36,7 +35,6 @@ public class Connection implements AutoCloseable {
         this.out = new PrintWriter(this.clientSocket.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
         this.username = name;
-        System.out.println("Client connected");
         // login();
     }
 
@@ -44,19 +42,18 @@ public class Connection implements AutoCloseable {
         boolean cancelled = false;
 
         while(!loggedIn && !cancelled) {
-            System.out.println("logging in client");
             try {
                 out.println("100-~Player Login~@Enter your username: ");
-                System.out.println("sent username prompt");
+                // System.out.println("sent username prompt");
                 username = in.readLine();
                 
                 out.println("101-Enter your password: ");
-                System.out.println("sent password prompt");
+                // System.out.println("sent password prompt");
                 password = in.readLine(); 
                 
                 loggedIn = UserAdmin.login(username, password, out);
                 if(!loggedIn)
-                    cancelled = !yesOrNo();
+                    cancelled = !Validation.tryAgain(this);
 
             } catch(IOException e) {
                 out.println("Error logging in to server. Restart client.");
@@ -66,22 +63,7 @@ public class Connection implements AutoCloseable {
 
     }
 
-    public boolean yesOrNo() throws IOException {
-        String response;
-        boolean valid = false;
-
-        while(!valid) {
-            response = in.readLine();
-            if(response.equals("Y") || response.equals("y"))
-                return true;
-
-            else if(response.equals("N") || response.equals("n"))
-                return false;
-            
-            out.println("104-Try again?(Y|N)");
-        }
-        return valid;
-    }
+    
 
     @Override
     public void close() throws Exception {

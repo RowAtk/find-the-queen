@@ -35,7 +35,13 @@ public class FTQClient {
             case "101":
                 response = new String(System.console().readPassword());
                 break;
+            case "105":
+            case "200":
             case "300":
+            case "400":
+            case "401":
+            case "405":
+                System.out.println();
                 break;
             default:
                 response = stdIn.readLine();
@@ -64,8 +70,10 @@ public class FTQClient {
                 FTQUtils.print(server_msg[0]);
 
                 // server has ended game session
-                if(server_msg[0].equals("404"))
+                if(server_msg[0].equals("500")) {
                     connected = false;
+                    break;
+                }
                 
                 // server sends instructions
                 user_msg = processMsg(server_msg[0]);
@@ -73,6 +81,7 @@ public class FTQClient {
                 if(user_msg != null){
                     FTQUtils.print("sent response");
                     out.println(user_msg);
+                    System.out.println();
                 }
                     
             }
